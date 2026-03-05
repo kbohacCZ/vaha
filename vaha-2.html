@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Moje váha</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --bg: #0e1117;
+    --surface: #181d27;
+    --card: #1e2535;
+    --border: #2a3347;
+    --accent: #4ade80;
+    --accent2: #22d3ee;
+    --text: #f0f4ff;
+    --muted: #6b7a9e;
+    --danger: #f87171;
+    --warn: #fbbf24;
+    --radius: 16px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100dvh;
+    display: flex;
+    flex-direction: column;
+    max-width: 480px;
+    margin: 0 auto;
+  }
+
+  header {
+    padding: 24px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .header-left { display: flex; align-items: center; gap: 12px; }
+
+  .logo {
+    width: 38px; height: 38px;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    border-radius: 11px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 18px;
+  }
+
+  h1 { font-size: 20px; font-weight: 700; letter-spacing: -0.3px; }
+  h1 span { color: var(--accent); }
+
+  .header-actions { display: flex; gap: 8px; }
+
+  .btn-icon {
+    background: var(--card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    border-radius: 10px;
+    padding: 8px 10px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+  }
+  .btn-icon:active { color: var(--accent); border-color: var(--accent); }
+
+  .current-weight {
+    margin: 0 20px 14px;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    border: 1px solid var(--border);
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+  }
+
+  .cw-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 3px; }
+  .cw-value { font-family: 'DM Mono', monospace; font-size: 40px; font-weight: 500; line-height: 1; color: var(--accent); }
+  .cw-unit { color: var(--muted); font-size: 15px; margin-bottom: 5px; }
+  .cw-date { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .cw-trend { font-size: 12px; margin-top: 5px; }
+
+  .cw-right { text-align: right; }
+  .delta-val { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; }
+  .delta-val.up { color: var(--danger); }
+  .delta-val.down { color: var(--accent); }
+  .delta-val.same { color: var(--muted); }
+  .delta-label { font-size: 11px; color: var(--muted); margin-bottom: 8px; }
+
+  .goal-card {
+    margin: 0 20px 14px;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+  }
+
+  .goal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+  }
+
+  .goal-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+  .goal-nums { font-family: 'DM Mono', monospace; font-size: 13px; color: var(--text); }
+  .goal-nums span { color: var(--accent); }
+
+  .progress-bar-bg { height: 8px; background: var(--border); border-radius: 50px; overflow: hidden; }
+  .progress-bar-fill { height: 100%; border-radius: 50px; background: linear-gradient(90deg, var(--accent), var(--accent2)); transition: width 0.5s ease; }
+
+  .goal-meta { display: flex; justify-content: space-between; margin-top: 8px; font-size: 12px; color: var(--muted); }
+
+  .goal-set-row { display: flex; gap: 8px; margin-top: 10px; }
+
+  .goal-input {
+    flex: 1;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 15px;
+    padding: 10px 12px;
+    outline: none;
+  }
+  .goal-input:focus { border-color: var(--accent); }
+
+  .btn-sm {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    color: var(--accent);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    padding: 10px 14px;
+    cursor: pointer;
+  }
+  .btn-sm:active { background: var(--border); }
+
+  .input-card {
+    margin: 0 20px 14px;
+    background: var(--card);
+    border-radius: var(--radius);
+    padding: 16px 20px;
+    border: 1px solid var(--border);
+  }
+
+  .input-card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+
+  .section-label { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  .prev-weight {
+    font-size: 12px;
+    color: var(--muted);
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 4px 10px;
+    font-family: 'DM Mono', monospace;
+  }
+  .prev-weight strong { color: var(--text); }
+
+  .input-row { display: flex; gap: 8px; margin-bottom: 8px; }
+  .input-group { flex: 1; }
+  .input-group label { display: block; font-size: 11px; color: var(--muted); margin-bottom: 5px; text-transform: uppercase; letter-spacing: 0.8px; }
+
+  input[type="text"], input[type="number"] {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 11px;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 17px;
+    padding: 12px 14px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  input[type="text"]:focus, input[type="number"]:focus { border-color: var(--accent); }
+
+  .note-input {
+    width: 100%;
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 11px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 14px;
+    padding: 10px 14px;
+    outline: none;
+    resize: none;
+    transition: border-color 0.2s;
+  }
+  .note-input:focus { border-color: var(--accent2); }
+  .note-input::placeholder { color: var(--muted); }
+
+  .btn-add {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent), #16a34a);
+    color: #0a1a0f;
+    border: none;
+    border-radius: 12px;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 14px;
+    cursor: pointer;
+    margin-top: 10px;
+    transition: opacity 0.15s, transform 0.1s;
+  }
+  .btn-add:active { opacity: 0.8; transform: scale(0.98); }
+
+  .tabs {
+    display: flex;
+    margin: 0 20px 14px;
+    background: var(--card);
+    border-radius: 12px;
+    padding: 4px;
+    border: 1px solid var(--border);
+  }
+
+  .tab {
+    flex: 1;
+    text-align: center;
+    padding: 9px;
+    border-radius: 9px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+    color: var(--muted);
+  }
+  .tab.active { background: var(--accent); color: #0a1a0f; font-weight: 700; }
+
+  .panel { display: none; padding: 0 20px 100px; }
+  .panel.active { display: block; }
+
+  .table-wrap { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; }
+  thead { background: var(--surface); }
+  th { padding: 10px 12px; font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; text-align: left; }
+  td { padding: 11px 12px; border-top: 1px solid var(--border); font-size: 13px; vertical-align: middle; }
+  td.date-col { color: var(--muted); font-family: 'DM Mono', monospace; font-size: 12px; }
+  td.weight-col { font-family: 'DM Mono', monospace; font-weight: 500; font-size: 14px; }
+  td.note-col { color: var(--muted); font-size: 12px; max-width: 80px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+  .badge { display: inline-block; padding: 2px 7px; border-radius: 50px; font-size: 11px; font-family: 'DM Mono', monospace; font-weight: 500; }
+  .badge.up { background: rgba(248,113,113,0.15); color: var(--danger); }
+  .badge.down { background: rgba(74,222,128,0.15); color: var(--accent); }
+  .badge.same { background: var(--border); color: var(--muted); }
+
+  .btn-del { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 14px; padding: 4px; transition: color 0.2s; }
+  .btn-del:active { color: var(--danger); }
+
+  .empty-state { text-align: center; padding: 60px 20px; color: var(--muted); }
+  .empty-state .icon { font-size: 44px; margin-bottom: 12px; }
+  .empty-state p { font-size: 14px; }
+
+  .chart-card { background: var(--card); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px 18px; margin-bottom: 12px; }
+
+  .chart-toolbar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+  .chart-title { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: 1px; }
+
+  .range-btns { display: flex; gap: 4px; }
+  .range-btn { background: var(--surface); border: 1.5px solid var(--border); border-radius: 8px; color: var(--muted); font-size: 11px; font-weight: 600; padding: 5px 10px; cursor: pointer; transition: all 0.15s; }
+  .range-btn.active { background: var(--accent); border-color: var(--accent); color: #0a1a0f; }
+
+  canvas { display: block; width: 100% !important; }
+
+  .chart-legend { display: flex; gap: 14px; margin-top: 10px; flex-wrap: wrap; }
+  .legend-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
+  .legend-line { width: 14px; height: 3px; border-radius: 2px; }
+
+  .chart-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-top: 12px; }
+  .stat { background: var(--surface); border-radius: 11px; padding: 11px; text-align: center; }
+  .stat-val { font-family: 'DM Mono', monospace; font-size: 17px; font-weight: 500; color: var(--accent); }
+  .stat-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 2px; }
+
+  .trend-row { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px; }
+  .trend-card { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 14px; }
+  .trend-label { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.8px; margin-bottom: 4px; }
+  .trend-val { font-family: 'DM Mono', monospace; font-size: 20px; font-weight: 500; }
+  .trend-val.down { color: var(--accent); }
+  .trend-val.up { color: var(--danger); }
+  .trend-val.same { color: var(--muted); }
+  .trend-desc { font-size: 11px; color: var(--muted); margin-top: 3px; }
+
+  .toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(80px); background: var(--accent); color: #0a1a0f; padding: 11px 22px; border-radius: 50px; font-weight: 600; font-size: 13px; transition: transform 0.3s cubic-bezier(.34,1.56,.64,1); z-index: 100; pointer-events: none; }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+
+  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.65); z-index: 200; align-items: flex-end; justify-content: center; }
+  .modal-overlay.open { display: flex; }
+  .modal { background: var(--card); border-radius: 20px 20px 0 0; padding: 24px 20px 40px; width: 100%; max-width: 480px; border: 1px solid var(--border); border-bottom: none; }
+  .modal h2 { font-size: 16px; margin-bottom: 14px; }
+  .modal-btns { display: flex; gap: 10px; margin-top: 14px; }
+
+  .btn-primary { flex: 1; background: linear-gradient(135deg, var(--accent), #16a34a); color: #0a1a0f; border: none; border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 700; padding: 13px; cursor: pointer; }
+  .btn-secondary { flex: 1; background: var(--surface); color: var(--muted); border: 1.5px solid var(--border); border-radius: 12px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 600; padding: 13px; cursor: pointer; }
+  .import-info { font-size: 12px; color: var(--muted); margin-top: 8px; line-height: 1.6; }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-left">
+    <div class="logo">⚖️</div>
+    <h1>Moje <span>váha</span></h1>
+  </div>
+  <div class="header-actions">
+    <button class="btn-icon" onclick="openExport()">⬇ CSV</button>
+    <button class="btn-icon" onclick="openImport()">⬆ CSV</button>
+  </div>
+</header>
+
+<div class="current-weight" id="cwCard" style="display:none">
+  <div>
+    <div class="cw-label">Poslední měření</div>
+    <div style="display:flex;align-items:baseline;gap:5px">
+      <div class="cw-value" id="cwValue">--</div>
+      <div class="cw-unit">kg</div>
+    </div>
+    <div class="cw-date" id="cwDate"></div>
+    <div class="cw-trend" id="cwTrend"></div>
+  </div>
+  <div class="cw-right">
+    <div class="delta-val" id="cwDelta">--</div>
+    <div class="delta-label">oproti předchozímu</div>
+  </div>
+</div>
+
+<div class="goal-card">
+  <div class="goal-header">
+    <div class="goal-title">Cílová váha</div>
+    <div class="goal-nums" id="goalNums"></div>
+  </div>
+  <div id="goalProgressArea" style="display:none">
+    <div class="progress-bar-bg">
+      <div class="progress-bar-fill" id="goalFill" style="width:0%"></div>
+    </div>
+    <div class="goal-meta">
+      <span id="goalRemaining"></span>
+      <span id="goalPct"></span>
+    </div>
+  </div>
+  <div class="goal-set-row">
+    <input type="number" class="goal-input" id="goalInput" placeholder="Zadej cíl v kg" step="0.1" min="20" max="300">
+    <button class="btn-sm" onclick="saveGoal()">Uložit</button>
+    <button class="btn-sm" id="clearGoalBtn" style="display:none;color:var(--muted)" onclick="clearGoal()">✕</button>
+  </div>
+</div>
+
+<div class="input-card">
+  <div class="input-card-header">
+    <div class="section-label">Nový záznam</div>
+    <div class="prev-weight" id="prevWeightBadge" style="display:none">
+      předchozí: <strong id="prevWeightVal">--</strong> kg
+    </div>
+  </div>
+  <div class="input-row">
+    <div class="input-group" style="max-width:148px">
+      <label>Datum</label>
+      <input type="text" id="dateInput" placeholder="dd.mm.rrrr" maxlength="10">
+    </div>
+    <div class="input-group">
+      <label>Váha (kg)</label>
+      <input type="number" id="weightInput" placeholder="75.5" step="0.1" min="20" max="300">
+    </div>
+  </div>
+  <div>
+    <label style="font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.8px;display:block;margin-bottom:5px">Poznámka (volitelné)</label>
+    <textarea class="note-input" id="noteInput" rows="2" placeholder="např. po dovolené, ráno před snídaní…"></textarea>
+  </div>
+  <button class="btn-add" onclick="addEntry()">+ Přidat záznam</button>
+</div>
+
+<div class="tabs">
+  <div class="tab active" onclick="switchTab('table',this)">📋 Tabulka</div>
+  <div class="tab" onclick="switchTab('chart',this)">📈 Graf</div>
+</div>
+
+<div id="panel-table" class="panel active">
+  <div id="tableContainer"></div>
+</div>
+
+<div id="panel-chart" class="panel">
+  <div class="trend-row" id="trendRow"></div>
+  <div class="chart-card">
+    <div class="chart-toolbar">
+      <div class="chart-title">Průběh hmotnosti</div>
+      <div class="range-btns">
+        <button class="range-btn" onclick="setRange(30,this)">30 d</button>
+        <button class="range-btn" onclick="setRange(90,this)">90 d</button>
+        <button class="range-btn active" onclick="setRange(0,this)">Vše</button>
+      </div>
+    </div>
+    <canvas id="weightChart" height="220"></canvas>
+    <div class="chart-legend">
+      <div class="legend-item"><div class="legend-line" style="background:var(--accent)"></div>Váha</div>
+      <div class="legend-item"><div class="legend-line" style="background:var(--accent2)"></div>Klouzavý průměr</div>
+      <div class="legend-item" id="goalLegend" style="display:none"><div class="legend-line" style="background:var(--warn)"></div>Cíl</div>
+    </div>
+    <div class="chart-stats">
+      <div class="stat"><div class="stat-val" id="statMin">--</div><div class="stat-label">Minimum</div></div>
+      <div class="stat"><div class="stat-val" id="statAvg">--</div><div class="stat-label">Průměr</div></div>
+      <div class="stat"><div class="stat-val" id="statMax">--</div><div class="stat-label">Maximum</div></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<div class="modal-overlay" id="exportModal">
+  <div class="modal">
+    <h2>📥 Export dat do CSV</h2>
+    <p style="font-size:13px;color:var(--muted)">Stáhne se soubor <strong>vaha_export.csv</strong> — záloha nebo otevření v Excelu.</p>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="doExport()">Stáhnout CSV</button>
+      <button class="btn-secondary" onclick="closeModal('exportModal')">Zrušit</button>
+    </div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="importModal">
+  <div class="modal">
+    <h2>📤 Import dat z CSV</h2>
+    <p class="import-info">CSV musí mít hlavičku: <strong>datum,vaha,poznamka</strong><br>Formát data: dd.mm.rrrr (stejný jako při exportu).</p>
+    <div style="margin-top:12px">
+      <input type="file" id="importFile" accept=".csv" style="color:var(--text);font-size:13px;width:100%">
+    </div>
+    <div class="modal-btns">
+      <button class="btn-primary" onclick="doImport()">Importovat</button>
+      <button class="btn-secondary" onclick="closeModal('importModal')">Zrušit</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const STORAGE_KEY = 'vaha_zaznamy_v2';
+const GOAL_KEY = 'vaha_cil';
+let chartRange = 0;
+
+function load() { try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch { return []; } }
+function save(d) { localStorage.setItem(STORAGE_KEY, JSON.stringify(d)); }
+function loadGoal() { return parseFloat(localStorage.getItem(GOAL_KEY)) || null; }
+function saveGoalLS(v) { localStorage.setItem(GOAL_KEY, v); }
+function clearGoalLS() { localStorage.removeItem(GOAL_KEY); }
+
+function todayStr() {
+  const d = new Date();
+  return `${String(d.getDate()).padStart(2,'0')}.${String(d.getMonth()+1).padStart(2,'0')}.${d.getFullYear()}`;
+}
+
+function parseDate(s) {
+  if (!s) return null;
+  const p = s.split('.');
+  if (p.length !== 3) return null;
+  const d=+p[0],m=+p[1],y=+p[2];
+  if (isNaN(d)||isNaN(m)||isNaN(y)||d<1||d>31||m<1||m>12||y<1900||y>2100) return null;
+  return new Date(y,m-1,d);
+}
+
+function toISO(s) { const p=s.split('.'); return `${p[2]}-${p[1].padStart(2,'0')}-${p[0].padStart(2,'0')}`; }
+function sortedAsc() { return load().sort((a,b)=>toISO(a.date).localeCompare(toISO(b.date))); }
+
+// Date auto-format
+const di = document.getElementById('dateInput');
+di.value = todayStr();
+di.addEventListener('input', function() {
+  let v = this.value.replace(/[^0-9.]/g,'');
+  if (v.length===2 && !v.includes('.')) v+='.';
+  else if (v.length===5 && v.indexOf('.',3)===-1) v+='.';
+  this.value = v;
+});
+
+function addEntry() {
+  const dateStr = di.value.trim();
+  const wStr = document.getElementById('weightInput').value.trim();
+  const note = document.getElementById('noteInput').value.trim();
+  if (!parseDate(dateStr)) { showToast('⚠️ Neplatné datum'); return; }
+  const w = parseFloat(wStr);
+  if (isNaN(w)||w<20||w>300) { showToast('⚠️ Neplatná váha'); return; }
+  const data = load();
+  const idx = data.findIndex(e=>e.date===dateStr);
+  if (idx>=0) { data[idx].weight=w; data[idx].note=note; showToast('✏️ Záznam aktualizován'); }
+  else { data.push({date:dateStr,weight:w,note}); showToast('✅ Uloženo'); }
+  save(data);
+  document.getElementById('weightInput').value='';
+  document.getElementById('noteInput').value='';
+  render();
+}
+
+function deleteEntry(dateStr) {
+  if (!confirm(`Smazat záznam ${dateStr}?`)) return;
+  save(load().filter(e=>e.date!==dateStr));
+  render();
+  showToast('🗑️ Smazáno');
+}
+
+function saveGoal() {
+  const v = parseFloat(document.getElementById('goalInput').value);
+  if (isNaN(v)||v<20||v>300) { showToast('⚠️ Neplatný cíl'); return; }
+  saveGoalLS(v);
+  document.getElementById('goalInput').value='';
+  showToast('🎯 Cíl uložen');
+  render();
+}
+
+function clearGoal() {
+  if (!confirm('Smazat cílovou váhu?')) return;
+  clearGoalLS();
+  render();
+}
+
+function renderGoal(data) {
+  const goal = loadGoal();
+  const clearBtn = document.getElementById('clearGoalBtn');
+  const progressArea = document.getElementById('goalProgressArea');
+  const numsEl = document.getElementById('goalNums');
+  if (!goal) { numsEl.textContent=''; progressArea.style.display='none'; clearBtn.style.display='none'; return; }
+  clearBtn.style.display='';
+  numsEl.innerHTML=`Cíl: <span>${goal.toFixed(1)} kg</span>`;
+  const sorted = data.slice().sort((a,b)=>toISO(a.date).localeCompare(toISO(b.date)));
+  if (sorted.length===0) { progressArea.style.display='none'; return; }
+  progressArea.style.display='block';
+  const start = sorted[0].weight;
+  const current = sorted[sorted.length-1].weight;
+  const totalChange = start - goal;
+  let pct, remaining;
+  if (Math.abs(totalChange)<0.01) { pct=100; remaining=0; }
+  else { const done=start-current; pct=Math.min(100,Math.max(0,(done/totalChange)*100)); remaining=current-goal; }
+  document.getElementById('goalFill').style.width=pct.toFixed(1)+'%';
+  document.getElementById('goalPct').textContent=pct.toFixed(0)+'% splněno';
+  document.getElementById('goalRemaining').textContent=remaining<=0?'🎉 Cíl splněn!':`zbývá ${remaining.toFixed(1)} kg`;
+}
+
+function calcTrend(data, days) {
+  if (data.length<2) return null;
+  const sorted = data.slice().sort((a,b)=>toISO(a.date).localeCompare(toISO(b.date)));
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate()-days);
+  const f = days>0 ? sorted.filter(e=>parseDate(e.date)>=cutoff) : sorted;
+  if (f.length<2) return null;
+  return f[f.length-1].weight - f[0].weight;
+}
+
+function renderHeader(data) {
+  const card = document.getElementById('cwCard');
+  if (data.length===0) { card.style.display='none'; return; }
+  card.style.display='flex';
+  const sorted = data.slice().sort((a,b)=>toISO(b.date).localeCompare(toISO(a.date)));
+  const last = sorted[0];
+  document.getElementById('cwValue').textContent=last.weight.toFixed(1);
+  document.getElementById('cwDate').textContent=last.date;
+  const badge = document.getElementById('prevWeightBadge');
+  if (sorted.length>1) { badge.style.display=''; document.getElementById('prevWeightVal').textContent=sorted[1].weight.toFixed(1); }
+  else { badge.style.display='none'; }
+  const deltaEl = document.getElementById('cwDelta');
+  if (sorted.length>1) {
+    const diff=(last.weight-sorted[1].weight).toFixed(1);
+    const cls=diff>0?'up':diff<0?'down':'same';
+    deltaEl.textContent=`${diff>0?'+':''}${diff} kg`;
+    deltaEl.className=`delta-val ${cls}`;
+  } else { deltaEl.textContent='—'; deltaEl.className='delta-val same'; }
+  const t30=calcTrend(data,30);
+  const trendEl=document.getElementById('cwTrend');
+  if (t30!==null) {
+    const col=t30>0.1?'var(--danger)':t30<-0.1?'var(--accent)':'var(--muted)';
+    const icon=t30>0.1?'↑':t30<-0.1?'↓':'→';
+    trendEl.innerHTML=`<span style="color:${col}">${icon} ${t30>0?'+':''}${t30.toFixed(1)} kg za 30 dní</span>`;
+  } else trendEl.textContent='';
+}
+
+function escHtml(s) { return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+function renderTable(data) {
+  const container = document.getElementById('tableContainer');
+  if (data.length===0) { container.innerHTML=`<div class="empty-state"><div class="icon">📊</div><p>Zatím žádné záznamy.<br>Přidej první měření!</p></div>`; return; }
+  const sorted = data.slice().sort((a,b)=>toISO(b.date).localeCompare(toISO(a.date)));
+  const asc = data.slice().sort((a,b)=>toISO(a.date).localeCompare(toISO(b.date)));
+  const prevMap = {};
+  asc.forEach((e,i)=>{ if(i>0) prevMap[e.date]=asc[i-1].weight; });
+  let rows='';
+  sorted.forEach(entry=>{
+    const prev=prevMap[entry.date];
+    let badge='<span class="badge same">—</span>';
+    if (prev!==undefined) {
+      const diff=(entry.weight-prev).toFixed(1);
+      if (diff>0) badge=`<span class="badge up">+${diff}</span>`;
+      else if (diff<0) badge=`<span class="badge down">${diff}</span>`;
+      else badge=`<span class="badge same">0.0</span>`;
+    }
+    const noteText=entry.note?escHtml(entry.note):'<span style="color:var(--border)">—</span>';
+    rows+=`<tr><td class="date-col">${entry.date}</td><td class="weight-col">${entry.weight.toFixed(1)}</td><td>${badge}</td><td class="note-col" title="${escHtml(entry.note||'')}">${noteText}</td><td><button class="btn-del" onclick="deleteEntry('${entry.date}')">✕</button></td></tr>`;
+  });
+  container.innerHTML=`<div class="table-wrap"><table><thead><tr><th>Datum</th><th>Váha</th><th>Změna</th><th>Poznámka</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
+}
+
+function renderTrends(data) {
+  const row=document.getElementById('trendRow');
+  const t7=calcTrend(data,7); const t30=calcTrend(data,30);
+  function tCard(label,val) {
+    if (val===null) return `<div class="trend-card"><div class="trend-label">${label}</div><div class="trend-val same">—</div><div class="trend-desc">Nedostatek dat</div></div>`;
+    const cls=val>0.1?'up':val<-0.1?'down':'same';
+    const icon=val>0.1?'↑':val<-0.1?'↓':'→';
+    const desc=val>0.1?'váha roste':val<-0.1?'váha klesá':'váha stagnuje';
+    return `<div class="trend-card"><div class="trend-label">${label}</div><div class="trend-val ${cls}">${icon} ${val>0?'+':''}${val.toFixed(1)} kg</div><div class="trend-desc">${desc}</div></div>`;
+  }
+  row.innerHTML=tCard('Trend 7 dní',t7)+tCard('Trend 30 dní',t30);
+}
+
+function movingAvg(weights, win) {
+  return weights.map((_,i)=>{
+    const s=Math.max(0,i-Math.floor(win/2));
+    const e=Math.min(weights.length,s+win);
+    const sl=weights.slice(s,e);
+    return sl.reduce((a,v)=>a+v,0)/sl.length;
+  });
+}
+
+function setRange(days,btn) {
+  chartRange=days;
+  document.querySelectorAll('.range-btn').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderChart(sortedAsc());
+}
+
+function renderChart(allData) {
+  let data=allData;
+  if (chartRange>0) { const c=new Date(); c.setDate(c.getDate()-chartRange); data=allData.filter(e=>parseDate(e.date)>=c); }
+  const canvas=document.getElementById('weightChart');
+  const ctx=canvas.getContext('2d');
+  const dpr=window.devicePixelRatio||1;
+  const W=canvas.parentElement.clientWidth-36;
+  const H=220;
+  canvas.style.width=W+'px'; canvas.style.height=H+'px';
+  canvas.width=W*dpr; canvas.height=H*dpr;
+  ctx.scale(dpr,dpr); ctx.clearRect(0,0,W,H);
+  const goal=loadGoal();
+  document.getElementById('goalLegend').style.display=goal?'':'none';
+  if (data.length<2) {
+    ctx.fillStyle='#6b7a9e'; ctx.font='13px DM Sans,sans-serif'; ctx.textAlign='center';
+    ctx.fillText('Přidej alespoň 2 záznamy pro zobrazení grafu',W/2,H/2);
+    ['statMin','statAvg','statMax'].forEach(id=>document.getElementById(id).textContent='--'); return;
+  }
+  const weights=data.map(d=>d.weight);
+  const maW=movingAvg(weights,Math.min(5,Math.max(3,Math.ceil(weights.length/4))));
+  const allVals=[...weights,...(goal?[goal]:[])];
+  const minW=Math.min(...allVals), maxW=Math.max(...allVals);
+  const range=maxW-minW||1; const ext=range*0.18;
+  const pad={top:18,right:14,bottom:34,left:44};
+  const gW=W-pad.left-pad.right, gH=H-pad.top-pad.bottom;
+  function xp(i){return pad.left+(i/(data.length-1))*gW;}
+  function yp(v){return pad.top+(1-(v-(minW-ext))/(range+2*ext))*gH;}
+  // grid
+  ctx.strokeStyle='#2a3347'; ctx.lineWidth=1;
+  for (let i=0;i<=4;i++) {
+    const v=(minW-ext)+(i/4)*(range+2*ext); const y=yp(v);
+    ctx.beginPath(); ctx.moveTo(pad.left,y); ctx.lineTo(W-pad.right,y); ctx.stroke();
+    ctx.fillStyle='#6b7a9e'; ctx.font=`10px 'DM Mono',monospace`; ctx.textAlign='right';
+    ctx.fillText(v.toFixed(1),pad.left-5,y+3.5);
+  }
+  // x labels
+  const ls=Math.max(1,Math.ceil(data.length/6));
+  ctx.fillStyle='#6b7a9e'; ctx.font=`10px 'DM Sans',sans-serif`; ctx.textAlign='center';
+  data.forEach((d,i)=>{ if(i%ls===0||i===data.length-1){const p=d.date.split('.'); ctx.fillText(`${p[0]}.${p[1]}`,xp(i),H-pad.bottom+14);} });
+  // goal dashed line
+  if (goal) {
+    const gy=yp(goal);
+    ctx.save(); ctx.strokeStyle='#fbbf24'; ctx.lineWidth=1.5; ctx.setLineDash([5,4]);
+    ctx.beginPath(); ctx.moveTo(pad.left,gy); ctx.lineTo(W-pad.right,gy); ctx.stroke();
+    ctx.setLineDash([]); ctx.fillStyle='#fbbf24'; ctx.font=`10px 'DM Mono',monospace`; ctx.textAlign='right';
+    ctx.fillText(goal.toFixed(1),W-pad.right-2,gy-4); ctx.restore();
+  }
+  // gradient fill
+  const grad=ctx.createLinearGradient(0,pad.top,0,pad.top+gH);
+  grad.addColorStop(0,'rgba(74,222,128,0.28)'); grad.addColorStop(1,'rgba(74,222,128,0)');
+  ctx.beginPath(); ctx.moveTo(xp(0),yp(weights[0]));
+  data.forEach((_,i)=>{if(i>0)ctx.lineTo(xp(i),yp(weights[i]));});
+  ctx.lineTo(xp(data.length-1),H-pad.bottom); ctx.lineTo(xp(0),H-pad.bottom); ctx.closePath();
+  ctx.fillStyle=grad; ctx.fill();
+  // weight line
+  ctx.beginPath(); ctx.strokeStyle='#4ade80'; ctx.lineWidth=2.5; ctx.lineJoin='round';
+  data.forEach((_,i)=>i===0?ctx.moveTo(xp(i),yp(weights[i])):ctx.lineTo(xp(i),yp(weights[i]))); ctx.stroke();
+  // moving average
+  if (data.length>=4) {
+    ctx.beginPath(); ctx.strokeStyle='#22d3ee'; ctx.lineWidth=2; ctx.lineJoin='round';
+    maW.forEach((v,i)=>i===0?ctx.moveTo(xp(i),yp(v)):ctx.lineTo(xp(i),yp(v))); ctx.stroke();
+  }
+  // dots
+  data.forEach((_,i)=>{
+    ctx.beginPath(); ctx.arc(xp(i),yp(weights[i]),3.5,0,Math.PI*2);
+    ctx.fillStyle='#0e1117'; ctx.fill(); ctx.strokeStyle='#4ade80'; ctx.lineWidth=2; ctx.stroke();
+  });
+  // stats
+  const avg=weights.reduce((s,v)=>s+v,0)/weights.length;
+  document.getElementById('statMin').textContent=Math.min(...weights).toFixed(1);
+  document.getElementById('statAvg').textContent=avg.toFixed(1);
+  document.getElementById('statMax').textContent=Math.max(...weights).toFixed(1);
+}
+
+// Export
+function openExport(){document.getElementById('exportModal').classList.add('open');}
+function doExport(){
+  const data=sortedAsc();
+  if (data.length===0){showToast('⚠️ Žádná data');closeModal('exportModal');return;}
+  let csv='datum,vaha,poznamka\n';
+  data.forEach(e=>{const n=(e.note||'').replace(/"/g,'""');csv+=`${e.date},${e.weight.toFixed(1)},"${n}"\n`;});
+  const blob=new Blob(['\ufeff'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download='vaha_export.csv'; a.click();
+  URL.revokeObjectURL(url); closeModal('exportModal'); showToast('✅ CSV exportováno');
+}
+
+// Import
+function openImport(){document.getElementById('importModal').classList.add('open');}
+function doImport(){
+  const file=document.getElementById('importFile').files[0];
+  if (!file){showToast('⚠️ Vyber soubor');return;}
+  const reader=new FileReader();
+  reader.onload=function(e){
+    try {
+      const lines=e.target.result.replace(/\r/g,'').split('\n').filter(l=>l.trim());
+      if (lines.length<2){showToast('⚠️ Prázdný soubor');return;}
+      const existing=load(); const existingDates=new Set(existing.map(r=>r.date));
+      let added=0,updated=0;
+      lines.slice(1).forEach(line=>{
+        const cols=[]; let cur='',inQ=false;
+        for (const ch of line+','){if(ch==='"'){inQ=!inQ;}else if(ch===','&&!inQ){cols.push(cur.trim());cur='';}else{cur+=ch;}}
+        if (cols.length<2) return;
+        const date=cols[0]; const weight=parseFloat(cols[1]); const note=(cols[2]||'').replace(/^"|"$/g,'').replace(/""/g,'"');
+        if (!parseDate(date)||isNaN(weight)) return;
+        if (existingDates.has(date)){const idx=existing.findIndex(r=>r.date===date);existing[idx].weight=weight;existing[idx].note=note;updated++;}
+        else{existing.push({date,weight,note});existingDates.add(date);added++;}
+      });
+      save(existing); closeModal('importModal'); render();
+      showToast(`✅ +${added} nových, ${updated} aktualizováno`);
+    } catch(err){showToast('⚠️ Chyba při importu');}
+  };
+  reader.readAsText(file,'utf-8');
+}
+
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+document.querySelectorAll('.modal-overlay').forEach(el=>el.addEventListener('click',e=>{if(e.target===el)el.classList.remove('open');}));
+
+function switchTab(name,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+  if (name==='chart') setTimeout(()=>render(),30);
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show');
+  clearTimeout(t._timer); t._timer=setTimeout(()=>t.classList.remove('show'),2400);
+}
+
+function render(){
+  const data=load();
+  renderHeader(data); renderGoal(data); renderTable(data); renderTrends(data); renderChart(sortedAsc());
+  const g=loadGoal();
+  if(g) document.getElementById('goalInput').placeholder=`Aktuální cíl: ${g.toFixed(1)} kg`;
+}
+
+render();
+window.addEventListener('resize',()=>{if(document.getElementById('panel-chart').classList.contains('active'))renderChart(sortedAsc());});
+</script>
+</body>
+</html>
